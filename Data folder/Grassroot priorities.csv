@@ -1,0 +1,37 @@
+﻿Stage,Open Point,Remarks,Status,Remarks
+Login,SAML integration for login,Will take another week for resolving with Microsoft,Pending,"22Dec: Credentials provided by UBL IT is not what was requested. They are the ones for development
+06Jan: Waiting for Baswa to provide update from the IT team"
+Capture,Whatsapp Go Live and integration with the platform,Ankit to share flow and templates,,
+,Outbound calling integration from the platform,UB IT team needs to resolve firewall issue - kiran to speak with the team,Pending,"22Dec: Firewall configuration is still not completed by UBL IT
+06Jan: Firewall configurations are still pending for confirmation from UB IT."
+,Email Integration for outbound communication,To be updated on 16th Dec for global derogation - Ankit to speak to Suresh if not resolved on 16th Dec,Pending,"22Dec: Configuration is still not completed by UBL IT
+06Jan: MFA is still active on the account"
+,Integration of RPA bot with the portal- to capture SFA complaints,Kiran to check with Dhiraj - to be updated today (16th Dec),Pending,"22Dec: SFA export is still pending from UBL end
+06Jan: Waiting for Kiran to get the exported data updated from SFA application"
+,Master data from Bizom needed,Kiran to check with Dhiraj - to be updated today (16th Dec),Pending,"22Dec: Waiting for Data from UBL
+06Jan: Waiting for Kiran to get the exported data updated from SFA application"
+,SLA not added for complaints raised by agents,Laxmikant to rectify,Completed,19Dec: SLA has now been configured based on urgency selection 
+,SLAs are set as +1 day than defined,Laxmikant to rectify,Completed,19Dec: SLA issue has been fixed
+Allocation,Auto ticket transfer basis state / type (E.g. ticket to be auto transferred to Brewer once complaint is justified),Laxmikant to rectify,Completed,19Dec: when change to justified it reflect sop and state changed to RCA CAPA IN progress
+,"Auto status change on triggers (E.g. when type is changed to Justified, ticket moves to RCA IN PROGRESS)",Laxmikant to rectify,Completed,19Dec: when change to justified it reflect sop and state changed to RCA CAPA IN progress
+,"Ticket automatically moving to ""Awaiting Sample"" only when a sample is required and not for all cases",Laxmikant to rectify - Pending information to be added as a state,Completed,19Dec: Added when selecting categories and sub categories
+,Auto child ticket creation when sample is required and auto allocation to Sequel Logistics,To be manual only,Completed,19Dec: This has to be done manually only
+Validation,Unjustified complaints not going to approval - Ticket ID 2025000799,Currently manual - approval needs to be automated,Completed,19Dec: New state has been added to fix this workflow issue
+,Parallel CTC complaint validation process,Laxmikant to confirm on testing,Completed,19Dec: unjustified directly goes ctc
+Settlement,"Generating settlement report for all justified complaints basis the ""Payout file"" format",Sameer to confirm once ready,In Progress,"19Dec: We need price data for generating the payout report
+06Jan: Report structure is completed and is under testing"
+Reporting & Dashboards,Complaint interactions report - download / export to excel to be available across all stakeholders,Sameer to confirm once ready - EoD 17th Dec,Completed,"22Dec: In Progress
+06Jan: Permission has been assigned to users accordingly and report format has also been updated."
+,Dashboard basis the BRD with below KPIs -,Sameer to confirm once ready - EoD 17th Dec,Pending,"22Dec: In Progress
+06Jan: 1. Complaints by source - Completed
+2. Complaint TAT cycle by each stage - In Progress
+3. Justified vs Unjustified split - Completed
+4. Complaint split by sub-category, brewery etc. - Completed"
+,1. Complaints by source,,,
+,2. Complaint TAT cycle by each stage,,,
+,3. Justified vs Unjustified split,,,
+,"4. Complaint split by sub-category, brewery etc.",,,
+Escalation Matrix,,,Pending,
+Outbound email,,,Pending,
+Additional Properties,Option to assign new additional properties once the ticket is created,,Completed,06Jan: Added Option to assign additional properties to ticket after ticket is created
+Approval Review,Replacement of Approval review button inside View ticket,,Completed,06Jan: Now the review button is available inside view ticket to approve the interaction
