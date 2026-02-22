@@ -151,7 +151,7 @@ class ApiService {
             return await response.json()
         } catch (error) {
             console.error('Upload failed:', error)
-            return { success: false, error: 'Upload failed' }
+            return { success: false, file: null, error: 'Upload failed' }
         }
     }
 

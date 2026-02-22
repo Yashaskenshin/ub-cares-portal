@@ -13,6 +13,28 @@ export default function DashboardPage() {
     const [loading, setLoading] = useState(true)
     const [uploading, setUploading] = useState(false)
     const [uploadStatus, setUploadStatus] = useState<{ success: boolean; message: string } | null>(null)
+    const [error, setError] = useState<string | null>(null)
+    const [lastUpdated, setLastUpdated] = useState<Date>(new Date())
+
+    const fetchData = async () => {
+        setLoading(true)
+        setError(null)
+        try {
+            const data = await apiService.getMetrics()
+            setMetrics(data)
+            setLastUpdated(new Date())
+        } catch (err: any) {
+            setError(err.message || 'Failed to fetch metrics')
+        } finally {
+            setLoading(false)
+        }
+    }
+
+    useEffect(() => {
+        fetchData()
+        const interval = setInterval(fetchData, 5 * 60 * 1000)
+        return () => clearInterval(interval)
+    }, [])
 
     const handleFileUpload = async (event: React.ChangeEvent<HTMLInputElement>) => {
         const file = event.target.files?.[0]
