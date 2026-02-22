@@ -90,7 +90,7 @@ const Dashboard: React.FC = () => {
             </Box>
 
             <Grid container spacing={3} sx={{ mb: 4 }}>
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid item xs={12} md={4}>
                     <StatCard
                         title="Total Complaints"
                         value={metrics?.totalComplaints || 0}
@@ -99,7 +99,7 @@ const Dashboard: React.FC = () => {
                         subtext="+12% this week"
                     />
                 </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid item xs={12} md={4}>
                     <StatCard
                         title="SLA Compliance"
                         value={`${metrics?.slaCompliance || 0}%`}
@@ -108,7 +108,7 @@ const Dashboard: React.FC = () => {
                         subtext="Target: 90%"
                     />
                 </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid item xs={12} md={4}>
                     <StatCard
                         title="Pending Actions"
                         value={metrics?.pendingActions || 0}
@@ -120,7 +120,7 @@ const Dashboard: React.FC = () => {
             </Grid>
 
             <Grid container spacing={3}>
-                <Grid size={{ xs: 12, md: 8 }}>
+                <Grid item xs={12} md={8}>
                     <Paper sx={{ p: 3 }}>
                         <Typography variant="h6" sx={{ mb: 3 }}>Complaint Status Breakdown</Typography>
 
@@ -149,7 +149,7 @@ const Dashboard: React.FC = () => {
                         </Box>
                     </Paper>
                 </Grid>
-                <Grid size={{ xs: 12, md: 4 }}>
+                <Grid item xs={12} md={4}>
                     <Paper sx={{ p: 3, height: '100%' }}>
                         <Typography variant="h6" sx={{ mb: 3 }}>Quick Actions</Typography>
                         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>

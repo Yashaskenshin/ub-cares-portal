@@ -315,7 +315,7 @@ const ReportGeneration: React.FC = () => {
             {/* HERO SECTION: The Latest Brief */}
             {latestBrief && (
                 <Grid container spacing={3} sx={{ mb: 6 }}>
-                    <Grid size={{ xs: 12 }}>
+                    <Grid item xs={12}>
                         <Card sx={{
                             position: 'relative',
                             overflow: 'hidden'
@@ -323,7 +323,7 @@ const ReportGeneration: React.FC = () => {
 
                             <CardContent sx={{ p: 4 }}>
                                 <Grid container alignItems="center" spacing={4}>
-                                    <Grid size="auto">
+                                    <Grid item xs="auto">
                                         <Box sx={{
                                             width: 80, height: 80,
                                             borderRadius: '50%',
@@ -334,7 +334,7 @@ const ReportGeneration: React.FC = () => {
                                             <StarIcon sx={{ fontSize: 40, color: '#818cf8' }} />
                                         </Box>
                                     </Grid>
-                                    <Grid size="grow">
+                                    <Grid item xs>
                                         <BannerLabel>LATEST DAILY BRIEF</BannerLabel>
                                         <Typography variant="h4" sx={{ color: 'white', fontWeight: 700, mb: 1 }}>
                                             {latestBrief.filename}
@@ -347,7 +347,7 @@ const ReportGeneration: React.FC = () => {
                                             <Chip label={formatSize(latestBrief.size)} size="small" variant="outlined" sx={{ color: 'text.secondary', borderColor: 'rgba(255,255,255,0.2)' }} />
                                         </Box>
                                     </Grid>
-                                    <Grid size="auto">
+                                    <Grid item xs="auto">
                                         <Button
                                             variant="contained"
                                             size="large"
