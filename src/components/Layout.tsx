@@ -23,9 +23,11 @@ import {
     Description as ReportIcon,
     Settings as SettingsIcon,
     ChevronLeft as ChevronLeftIcon,
-    Code as ApiIcon
+    Code as ApiIcon,
+    Lock as LockIcon
 } from '@mui/icons-material';
 import { useLocation, useNavigate } from 'react-router-dom';
+import { useAuth } from '../contexts/AuthContext';
 
 const drawerWidth = 280; // Wider sidebar for premium feel
 
@@ -59,9 +61,15 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     const [open, setOpen] = useState(true);
     const navigate = useNavigate();
     const location = useLocation();
+    const { logout } = useAuth();
 
     const toggleDrawer = () => {
         setOpen(!open);
+    };
+
+    const handleLogout = () => {
+        logout();
+        navigate('/login');
     };
 
     const menuItems = [
@@ -89,6 +97,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                     <Typography component="h1" variant="h6" color="inherit" noWrap sx={{ flexGrow: 1 }}>
                         UB Cares Intelligence Portal
                     </Typography>
+                    <IconButton color="inherit" onClick={handleLogout} title="Lock Portal">
+                        <LockIcon />
+                    </IconButton>
                 </Toolbar>
             </AppBar>
             <Drawer
