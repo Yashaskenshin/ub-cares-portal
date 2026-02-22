@@ -1,4 +1,4 @@
-# 🌐 **UB CARES INTELLIGENCE HUB**
+# 🌐 **DAILY BRIEF WEB PORTAL**
 
 ## 🎯 **Overview**
 

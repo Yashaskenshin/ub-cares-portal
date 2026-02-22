@@ -186,7 +186,7 @@ const ApiTester: React.FC = () => {
                                     <Box sx={{ mb: 3, display: 'flex', alignItems: 'center', gap: 2 }}>
                                         <Typography variant="h6">Overall Status:</Typography>
                                         <Chip
-                                            icon={getStatusIcon(health.overall_status) || undefined}
+                                            icon={getStatusIcon(health.overall_status)}
                                             label={health.overall_status?.toUpperCase() || 'UNKNOWN'}
                                             color={getStatusColor(health.overall_status) as any}
                                             variant="filled"
