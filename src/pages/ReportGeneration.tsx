@@ -16,17 +16,14 @@ import {
     Grid,
     Card,
     CardContent,
-    CardActions,
     Divider,
-    Container,
     FormControlLabel,
     Checkbox,
     TextField,
     Select,
     MenuItem,
     InputLabel,
-    FormControl,
-    SelectChangeEvent
+    FormControl
 } from '@mui/material';
 import {
     Download as DownloadIcon,
@@ -39,7 +36,6 @@ import {
     AutoGraph as AIIcon,
     WorkspacePremium as LeadershipIcon,
     TrendingUp as ROIIcon,
-    CompareArrows,
     CompareArrows as TrendingUpIcon
 } from '@mui/icons-material';
 
@@ -184,7 +180,6 @@ const ReportGeneration: React.FC = () => {
                             </Paper>
                         )}
 
-                        {/* Date Range Inputs */}
                         <TextField
                             label="From Date"
                             type="date"
@@ -192,7 +187,7 @@ const ReportGeneration: React.FC = () => {
                             onChange={(e) => setFromDate(e.target.value)}
                             size="small"
                             variant="outlined"
-                            slotProps={{ inputLabel: { shrink: true } }}
+                            InputLabelProps={{ shrink: true }}
                             sx={{ width: 150 }}
                         />
                         <TextField
@@ -202,7 +197,7 @@ const ReportGeneration: React.FC = () => {
                             onChange={(e) => setToDate(e.target.value)}
                             size="small"
                             variant="outlined"
-                            slotProps={{ inputLabel: { shrink: true } }}
+                            InputLabelProps={{ shrink: true }}
                             sx={{ width: 150 }}
                         />
                         <FormControlLabel
@@ -315,7 +310,7 @@ const ReportGeneration: React.FC = () => {
             {/* HERO SECTION: The Latest Brief */}
             {latestBrief && (
                 <Grid container spacing={3} sx={{ mb: 6 }}>
-                    <Grid size={{ xs: 12 }}>
+                    <Grid item xs={12}>
                         <Card sx={{
                             position: 'relative',
                             overflow: 'hidden'
@@ -323,7 +318,7 @@ const ReportGeneration: React.FC = () => {
 
                             <CardContent sx={{ p: 4 }}>
                                 <Grid container alignItems="center" spacing={4}>
-                                    <Grid size="auto">
+                                    <Grid item xs="auto">
                                         <Box sx={{
                                             width: 80, height: 80,
                                             borderRadius: '50%',
@@ -334,7 +329,7 @@ const ReportGeneration: React.FC = () => {
                                             <StarIcon sx={{ fontSize: 40, color: '#818cf8' }} />
                                         </Box>
                                     </Grid>
-                                    <Grid size="grow">
+                                    <Grid item xs>
                                         <BannerLabel>LATEST DAILY BRIEF</BannerLabel>
                                         <Typography variant="h4" sx={{ color: 'white', fontWeight: 700, mb: 1 }}>
                                             {latestBrief.filename}
@@ -347,7 +342,7 @@ const ReportGeneration: React.FC = () => {
                                             <Chip label={formatSize(latestBrief.size)} size="small" variant="outlined" sx={{ color: 'text.secondary', borderColor: 'rgba(255,255,255,0.2)' }} />
                                         </Box>
                                     </Grid>
-                                    <Grid size="auto">
+                                    <Grid item xs="auto">
                                         <Button
                                             variant="contained"
                                             size="large"

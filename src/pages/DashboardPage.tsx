@@ -20,7 +20,7 @@ export default function DashboardPage() {
         setLoading(true)
         setError(null)
         try {
-            const data = await apiService.getMetrics()
+            const data = await apiService.getLiveMetrics()
             setMetrics(data)
             setLastUpdated(new Date())
         } catch (err: any) {

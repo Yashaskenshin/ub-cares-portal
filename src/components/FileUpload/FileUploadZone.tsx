@@ -6,20 +6,14 @@ import {
   Paper,
   LinearProgress,
   List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
   Chip,
-  Alert,
-  Divider,
   Stack
 } from '@mui/material';
 import {
   CloudUpload as CloudUploadIcon,
   CheckCircle as CheckCircleIcon,
   Error as ErrorIcon,
-  HourglassEmpty as HourglassIcon,
-  Description as FileIcon
+  HourglassEmpty as HourglassIcon
 } from '@mui/icons-material';
 import { uploadFile } from '../../services/api';
 
@@ -51,7 +45,6 @@ interface UploadedFile {
 
 const FileUploadZone: React.FC = () => {
   const [uploadedFiles, setUploadedFiles] = useState<UploadedFile[]>([]);
-  const [uploadError, setUploadError] = useState<string>('');
 
   const validateFile = (file: File): Promise<ValidationResult> => {
     return new Promise((resolve) => {
@@ -145,7 +138,6 @@ const FileUploadZone: React.FC = () => {
   };
 
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
-    setUploadError('');
 
     for (const file of acceptedFiles) {
       const fileId = `${Date.now()}-${file.name}`;
