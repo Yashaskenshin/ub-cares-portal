@@ -14,7 +14,7 @@ export const uploadFile = async (file: File) => {
 };
 
 export const getMetrics = async () => {
-    const response = await fetch(`${API_URL}/metrics`);
+    const response = await fetch(`${API_URL}/live-metrics`);
     return response.json();
 };
 

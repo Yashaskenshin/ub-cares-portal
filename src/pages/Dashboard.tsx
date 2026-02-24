@@ -7,14 +7,16 @@ import {
     Grid,
     LinearProgress,
     Avatar,
-    Divider
+    Divider,
+    Alert
 } from '@mui/material';
 import {
     Assignment as ComplaintIcon,
     CheckCircle as ComplianceIcon,
     Assessment as ReportIcon,
     Warning as AlertIcon,
-    TrendingUp as TrendIcon
+    TrendingUp as TrendIcon,
+    HealthAndSafety as HealthIcon
 } from '@mui/icons-material';
 
 import { getMetrics } from '../services/api';
@@ -22,20 +24,27 @@ import { getMetrics } from '../services/api';
 const Dashboard: React.FC = () => {
     const [metrics, setMetrics] = useState<any>(null);
     const [loading, setLoading] = useState(true);
+    const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
         getMetrics().then(data => {
-            setMetrics(data);
+            if (data.status === 'error') {
+                setError(data.error || 'Failed to fetch metrics');
+            } else {
+                setMetrics(data);
+            }
             setLoading(false);
         }).catch(err => {
             console.error(err);
+            setError('Could not connect to backend API.');
             setLoading(false);
         });
     }, []);
 
     if (loading) return (
-        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh' }}>
+        <Box sx={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '80vh', flexDirection: 'column', gap: 2 }}>
             <CircularProgress size={60} thickness={4} />
+            <Typography variant="body1" color="text.secondary">Loading live operational metrics...</Typography>
         </Box>
     );
 
@@ -43,7 +52,7 @@ const Dashboard: React.FC = () => {
         <Paper
             elevation={0}
             sx={{
-                p: { xs: 3, md: 4 }, // Consistent padding
+                p: { xs: 3, md: 4 },
                 height: '100%',
                 display: 'flex',
                 flexDirection: 'column',
@@ -70,9 +79,8 @@ const Dashboard: React.FC = () => {
             </Box>
 
             {subtext && (
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                    <TrendIcon sx={{ fontSize: 16, color: '#4ade80', mr: 0.5 }} />
-                    <Typography variant="caption" sx={{ color: '#4ade80', fontWeight: 600 }}>{subtext}</Typography>
+                <Box sx={{ display: 'flex', alignItems: 'center', mt: 1 }}>
+                    <Typography variant="caption" sx={{ color: 'text.secondary', fontWeight: 500 }}>{subtext}</Typography>
                 </Box>
             )}
         </Paper>
@@ -85,86 +93,115 @@ const Dashboard: React.FC = () => {
                     Dashboard
                 </Typography>
                 <Typography variant="body1" color="text.secondary">
-                    Welcome back. Here is your daily overview.
+                    Live operational health overview
                 </Typography>
             </Box>
 
-            <Grid container spacing={3} sx={{ mb: 4 }}>
-                <Grid item xs={12} md={4}>
-                    <StatCard
-                        title="Total Complaints"
-                        value={metrics?.totalComplaints || 0}
-                        icon={<ComplaintIcon />}
-                        color="#6366f1"
-                        subtext="+12% this week"
-                    />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <StatCard
-                        title="SLA Compliance"
-                        value={`${metrics?.slaCompliance || 0}%`}
-                        icon={<ComplianceIcon />}
-                        color="#10b981"
-                        subtext="Target: 90%"
-                    />
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <StatCard
-                        title="Pending Actions"
-                        value={metrics?.pendingActions || 0}
-                        icon={<AlertIcon />}
-                        color="#f43f5e"
-                        subtext="Requires Attention"
-                    />
-                </Grid>
-            </Grid>
+            {error && (
+                <Alert severity="error" sx={{ mb: 4, borderRadius: 2 }}>
+                    {error}
+                </Alert>
+            )}
 
-            <Grid container spacing={3}>
-                <Grid item xs={12} md={8}>
-                    <Paper sx={{ p: 3 }}>
-                        <Typography variant="h6" sx={{ mb: 3 }}>Complaint Status Breakdown</Typography>
+            {!error && metrics && (
+                <>
+                    <Grid container spacing={3} sx={{ mb: 4 }}>
+                        <Grid item xs={12} md={4}>
+                            <StatCard
+                                title="Total Complaints"
+                                value={metrics.record_count?.toLocaleString() || 0}
+                                icon={<ComplaintIcon />}
+                                color="#6366f1"
+                                subtext={`From ${metrics.data_source || 'latest sync'}`}
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <StatCard
+                                title="System Health Score"
+                                value={`${metrics.health_score || 0}`}
+                                icon={<HealthIcon />}
+                                color={metrics.health_score >= 80 ? "#10b981" : metrics.health_score >= 60 ? "#f59e0b" : "#ef4444"}
+                                subtext="Out of 100 (Weighted Average)"
+                            />
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <StatCard
+                                title="Pending RCA / Justification"
+                                value={(metrics.resolve?.total_requiring_rca - metrics.resolve?.rca_completed) + metrics.validate?.pending || 0}
+                                icon={<AlertIcon />}
+                                color="#f43f5e"
+                                subtext="Requires Attention"
+                            />
+                        </Grid>
+                    </Grid>
 
-                        <Box sx={{ mb: 3 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                <Typography variant="body2">Open (Active)</Typography>
-                                <Typography variant="body2" fontWeight="bold">78%</Typography>
-                            </Box>
-                            <LinearProgress variant="determinate" value={78} sx={{ height: 8, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.05)', '& .MuiLinearProgress-bar': { bgcolor: '#6366f1' } }} />
-                        </Box>
+                    <Grid container spacing={3}>
+                        <Grid item xs={12} md={8}>
+                            <Paper sx={{ p: 4, height: '100%' }}>
+                                <Typography variant="h6" sx={{ mb: 4, fontWeight: 600 }}>Operational Stages</Typography>
 
-                        <Box sx={{ mb: 3 }}>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                <Typography variant="body2">Closed (Resolved)</Typography>
-                                <Typography variant="body2" fontWeight="bold">15%</Typography>
-                            </Box>
-                            <LinearProgress variant="determinate" value={15} sx={{ height: 8, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.05)', '& .MuiLinearProgress-bar': { bgcolor: '#10b981' } }} />
-                        </Box>
+                                <Box sx={{ mb: 3 }}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 500 }}>Data Capture Completeness</Typography>
+                                        <Typography variant="body2" fontWeight="bold">{metrics.capture?.completeness_rate || 0}%</Typography>
+                                    </Box>
+                                    <LinearProgress variant="determinate" value={metrics.capture?.completeness_rate || 0} sx={{ height: 8, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.05)', '& .MuiLinearProgress-bar': { bgcolor: '#6366f1' } }} />
+                                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>Missing fields trigger manual fallbacks.</Typography>
+                                </Box>
 
-                        <Box>
-                            <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                                <Typography variant="body2">Escalated</Typography>
-                                <Typography variant="body2" fontWeight="bold">7%</Typography>
-                            </Box>
-                            <LinearProgress variant="determinate" value={7} sx={{ height: 8, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.05)', '& .MuiLinearProgress-bar': { bgcolor: '#f43f5e' } }} />
-                        </Box>
-                    </Paper>
-                </Grid>
-                <Grid item xs={12} md={4}>
-                    <Paper sx={{ p: 3, height: '100%' }}>
-                        <Typography variant="h6" sx={{ mb: 3 }}>Quick Actions</Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                            Latest Report Generated:
-                        </Typography>
-                        <Typography variant="h6" color="primary" sx={{ mb: 3 }}>
-                            {new Date(metrics?.lastUpdated).toLocaleDateString()}
-                        </Typography>
-                        <Divider sx={{ my: 2 }} />
-                        <Typography variant="body2" color="text.secondary">
-                            System Status: <Box component="span" sx={{ color: '#10b981', fontWeight: 'bold' }}>● Operational</Box>
-                        </Typography>
-                    </Paper>
-                </Grid>
-            </Grid>
+                                <Box sx={{ mb: 3 }}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 500 }}>Logistics Pickup Completion</Typography>
+                                        <Typography variant="body2" fontWeight="bold">{metrics.allocate?.completion_rate || 0}%</Typography>
+                                    </Box>
+                                    <LinearProgress variant="determinate" value={metrics.allocate?.completion_rate || 0} sx={{ height: 8, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.05)', '& .MuiLinearProgress-bar': { bgcolor: '#10b981' } }} />
+                                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>Overdue Pickups: {metrics.allocate?.overdue_count || 0}</Typography>
+                                </Box>
+
+                                <Box>
+                                    <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                                        <Typography variant="body2" sx={{ fontWeight: 500 }}>Brewery RCA Initiation Rate</Typography>
+                                        <Typography variant="body2" fontWeight="bold">{metrics.resolve?.rca_initiation_rate || 0}%</Typography>
+                                    </Box>
+                                    <LinearProgress variant="determinate" value={metrics.resolve?.rca_initiation_rate || 0} sx={{ height: 8, borderRadius: 4, bgcolor: 'rgba(255,255,255,0.05)', '& .MuiLinearProgress-bar': { bgcolor: '#f59e0b' } }} />
+                                    <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>Target is &gt;80% to avoid SLA breaches.</Typography>
+                                </Box>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={12} md={4}>
+                            <Paper sx={{ p: 4, height: '100%', display: 'flex', flexDirection: 'column' }}>
+                                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Quick Details</Typography>
+
+                                <Box sx={{ mb: 3 }}>
+                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                                        Last Data Sync:
+                                    </Typography>
+                                    <Typography variant="body1" sx={{ fontWeight: 500 }}>
+                                        {metrics.date}
+                                    </Typography>
+                                </Box>
+
+                                <Box sx={{ mb: 3 }}>
+                                    <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                                        Processed Source:
+                                    </Typography>
+                                    <Typography variant="body2" sx={{ fontFamily: 'monospace', wordBreak: 'break-all', bgcolor: 'rgba(255,255,255,0.05)', p: 1, borderRadius: 1 }}>
+                                        {metrics.data_source}
+                                    </Typography>
+                                </Box>
+
+                                <Divider sx={{ my: 'auto', opacity: 0 }} />
+                                <Box sx={{ p: 2, bgcolor: 'rgba(16, 185, 129, 0.1)', borderRadius: 2, border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                                    <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
+                                        <Box component="span" sx={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', bgcolor: '#10b981', mr: 1, animation: 'pulse 2s infinite' }} />
+                                        Backend System Online
+                                    </Typography>
+                                </Box>
+                            </Paper>
+                        </Grid>
+                    </Grid>
+                </>
+            )}
         </Box>
     );
 };
