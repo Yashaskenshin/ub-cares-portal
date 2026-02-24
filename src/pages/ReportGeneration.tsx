@@ -54,6 +54,7 @@ const ReportGeneration: React.FC = () => {
     const [useComparisonReport, setUseComparisonReport] = useState(false);
     const [showAllArchive, setShowAllArchive] = useState(false);
     const [useFullDateRange, setUseFullDateRange] = useState(false);
+    const [appendRoiToLeadership, setAppendRoiToLeadership] = useState(false);
 
     const [lastSourceFile, setLastSourceFile] = useState<string | null>(null);
 
@@ -91,7 +92,8 @@ const ReportGeneration: React.FC = () => {
             useComparisonReport,
             useFullDateRange ? undefined : fromDate,
             useFullDateRange ? undefined : toDate,
-            selectedFile || undefined
+            selectedFile || undefined,
+            appendRoiToLeadership
         );
         setGenerating(false);
         if (result && result.report && result.report.sourceFile) {
@@ -253,6 +255,26 @@ const ReportGeneration: React.FC = () => {
                                 </Typography>
                             }
                         />
+
+                        {/* Append ROI to Leadership -> Depend on Leadership Brief */}
+                        {useLeadershipBrief && (
+                            <FormControlLabel
+                                control={
+                                    <Checkbox
+                                        checked={appendRoiToLeadership}
+                                        onChange={(e) => setAppendRoiToLeadership(e.target.checked)}
+                                        color="primary"
+                                        size="small"
+                                        sx={{ color: 'rgba(239, 68, 68, 0.8)' }}
+                                    />
+                                }
+                                label={
+                                    <Typography variant="body2" sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                        ➕ Append ROI to Leadership Brief
+                                    </Typography>
+                                }
+                            />
+                        )}
 
                         <FormControlLabel
                             control={

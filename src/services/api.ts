@@ -39,7 +39,8 @@ export const generateReport = async (
     useComparisonReport: boolean = false,
     fromDate?: string,
     toDate?: string,
-    filename?: string
+    filename?: string,
+    appendRoiToLeadership: boolean = false
 ) => {
     const response = await fetch(`${API_URL}/generate-report`, {
         method: 'POST',
@@ -51,7 +52,8 @@ export const generateReport = async (
             useComparisonReport,
             fromDate,
             toDate,
-            filename
+            filename,
+            appendRoiToLeadership
         })
     });
     return response.json();
