@@ -77,7 +77,7 @@ export const generateReport = async (
 };
 
 export const getSourceFiles = async () => {
-    const response = await fetch(`${API_URL}/source-files`, {
+    const response = await fetch(`${API_URL}/files`, {
         headers: { ...getAuthHeaders() }
     });
     return response.json();
