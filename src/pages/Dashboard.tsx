@@ -21,6 +21,58 @@ import {
 
 import { getMetrics } from '../services/api';
 
+const ExpandableBreweryRow = ({ row }: { row: any }) => {
+    const [expanded, setExpanded] = useState(false);
+    return (
+        <React.Fragment>
+            <tr
+                style={{ borderBottom: '1px solid rgba(255,255,255,0.05)', cursor: 'pointer', transition: 'background-color 0.2s' }}
+                onClick={() => setExpanded(!expanded)}
+                onMouseEnter={(e) => e.currentTarget.style.backgroundColor = 'rgba(255,255,255,0.02)'}
+                onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+            >
+                <td style={{ padding: '12px 8px', fontWeight: 500, display: 'flex', alignItems: 'center' }}>
+                    <Box sx={{ width: 16, mr: 1, display: 'inline-flex', justifyContent: 'center' }}>
+                        {expanded ? '▼' : '▶'}
+                    </Box>
+                    {row.name}
+                </td>
+                <td style={{ padding: '12px 8px' }}>{row.total_receiving}</td>
+                <td style={{ padding: '12px 8px' }}>{row.total_pending}</td>
+                <td style={{ padding: '12px 8px' }}>{row.justified}</td>
+                <td style={{ padding: '12px 8px' }}>{row.unjustified}</td>
+                <td style={{ padding: '12px 8px', color: row.status_icon?.includes('!') ? '#f43f5e' : 'inherit' }}>
+                    {row.status_icon}
+                </td>
+            </tr>
+            {expanded && (
+                <tr style={{ backgroundColor: 'rgba(0,0,0,0.2)' }}>
+                    <td colSpan={6} style={{ padding: '16px 24px', borderBottom: '1px solid rgba(255,255,255,0.05)' }}>
+                        <Grid container spacing={2}>
+                            <Grid item xs={3}>
+                                <Typography variant="caption" color="text.secondary">Sent to CTC</Typography>
+                                <Typography variant="body2" fontWeight={600}>{row.sent_to_ctc}</Typography>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Typography variant="caption" color="text.secondary">Pending Sample</Typography>
+                                <Typography variant="body2" fontWeight={600}>{row.pending_sample}</Typography>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Typography variant="caption" color="text.secondary">Pending Info</Typography>
+                                <Typography variant="body2" fontWeight={600}>{row.pending_approval}</Typography>
+                            </Grid>
+                            <Grid item xs={3}>
+                                <Typography variant="caption" color="text.secondary">Missing Lab Action</Typography>
+                                <Typography variant="body2" fontWeight={600} color={row.pending_lab > 0 ? '#f59e0b' : 'inherit'}>{row.pending_lab}</Typography>
+                            </Grid>
+                        </Grid>
+                    </td>
+                </tr>
+            )}
+        </React.Fragment>
+    );
+};
+
 const Dashboard: React.FC = () => {
     const [metrics, setMetrics] = useState<any>(null);
     const [loading, setLoading] = useState(true);
@@ -28,7 +80,7 @@ const Dashboard: React.FC = () => {
 
     useEffect(() => {
         getMetrics().then(data => {
-            if (data.status === 'error') {
+            if (data.status === 'error' || data.error) {
                 setError(data.error || 'Failed to fetch metrics');
             } else {
                 setMetrics(data);
@@ -196,6 +248,37 @@ const Dashboard: React.FC = () => {
                                         <Box component="span" sx={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', bgcolor: '#10b981', mr: 1, animation: 'pulse 2s infinite' }} />
                                         Backend System Online
                                     </Typography>
+                                </Box>
+                            </Paper>
+                        </Grid>
+                        <Grid item xs={12}>
+                            <Paper sx={{ p: 4, mt: 2 }}>
+                                <Typography variant="h6" sx={{ mb: 3, fontWeight: 600 }}>Brewery League Table</Typography>
+                                <Box sx={{ overflowX: 'auto' }}>
+                                    <table style={{ width: '100%', borderCollapse: 'collapse', textAlign: 'left' }}>
+                                        <thead>
+                                            <tr style={{ borderBottom: '2px solid rgba(255,255,255,0.1)' }}>
+                                                <th style={{ padding: '12px 8px' }}>Brewery</th>
+                                                <th style={{ padding: '12px 8px' }}>Total Complaints</th>
+                                                <th style={{ padding: '12px 8px' }}>Pending Validation</th>
+                                                <th style={{ padding: '12px 8px' }}>Justified</th>
+                                                <th style={{ padding: '12px 8px' }}>Unjustified</th>
+                                                <th style={{ padding: '12px 8px' }}>Action Required</th>
+                                            </tr>
+                                        </thead>
+                                        <tbody>
+                                            {metrics.league_table?.map((row: any, idx: number) => (
+                                                <ExpandableBreweryRow key={idx} row={row} />
+                                            ))}
+                                            {(!metrics.league_table || metrics.league_table.length === 0) && (
+                                                <tr>
+                                                    <td colSpan={6} style={{ padding: '24px', textAlign: 'center', color: 'rgba(255,255,255,0.5)' }}>
+                                                        No brewery data available.
+                                                    </td>
+                                                </tr>
+                                            )}
+                                        </tbody>
+                                    </table>
                                 </Box>
                             </Paper>
                         </Grid>
