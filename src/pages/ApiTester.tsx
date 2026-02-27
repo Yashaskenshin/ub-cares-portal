@@ -358,9 +358,9 @@ const ApiTester: React.FC = () => {
                                         records.map((row: any, i) => (
                                             <TableRow key={i} hover>
                                                 <TableCell sx={{ fontFamily: 'monospace' }}>
-                                                    {row['Interaction ID'] || row['Check'] || 'N/A'}
+                                                    {row['Interaction_ID'] || row['Check'] || 'N/A'}
                                                 </TableCell>
-                                                <TableCell>{row['Date Created']}</TableCell>
+                                                <TableCell>{row['Date_Created']}</TableCell>
                                                 <TableCell>
                                                     <Chip
                                                         label={row['Status']}
@@ -371,9 +371,9 @@ const ApiTester: React.FC = () => {
                                                     />
                                                 </TableCell>
                                                 <TableCell>{row['Category']}</TableCell>
-                                                <TableCell>{row['Sub Category']}</TableCell>
-                                                <TableCell>{row['Priority']}</TableCell>
-                                                <TableCell>{row['Branch']}</TableCell>
+                                                <TableCell>{row['Sub_Category']}</TableCell>
+                                                <TableCell>{row['Complexity']}</TableCell>
+                                                <TableCell>{row['Location']}</TableCell>
                                             </TableRow>
                                         ))
                                     )}
