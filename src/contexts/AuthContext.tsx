@@ -2,7 +2,7 @@ import React, { createContext, useContext, useState, useEffect } from 'react';
 
 interface AuthContextType {
     isAuthenticated: boolean;
-    login: (password: string) => boolean;
+    login: (password: string) => Promise<boolean>;
     logout: () => void;
 }
 
@@ -14,14 +14,24 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         return sessionStorage.getItem('isAuthenticated') === 'true';
     });
 
-    const login = (password: string) => {
-        // In production, compare against Vercel env variable. Fallback to 'ubcares' for local dev if not set.
-        const validPassword = import.meta.env.VITE_APP_PASSWORD || 'ubcares';
+    const login = async (password: string): Promise<boolean> => {
+        try {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : 'https://ubcares-production.up.railway.app');
+            const response = await fetch(`${API_BASE_URL}/api/auth/login`, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ password })
+            });
 
-        if (password === validPassword) {
-            setIsAuthenticated(true);
-            sessionStorage.setItem('isAuthenticated', 'true');
-            return true;
+            if (response.ok) {
+                const data = await response.json();
+                setIsAuthenticated(true);
+                sessionStorage.setItem('isAuthenticated', 'true');
+                sessionStorage.setItem('jwtToken', data.token);
+                return true;
+            }
+        } catch (error) {
+            console.error('Login failed:', error);
         }
         return false;
     };
@@ -29,6 +39,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const logout = () => {
         setIsAuthenticated(false);
         sessionStorage.removeItem('isAuthenticated');
+        sessionStorage.removeItem('jwtToken');
     };
 
     return (

@@ -72,7 +72,7 @@ const ReportGeneration: React.FC = () => {
     const [toDate, setToDate] = useState<string>(today);
 
     const fetchReports = () => {
-        getReports().then(data => setReports(data.reports));
+        getReports().then(data => setReports(data.reports || []));
         getDbDateRange().then(data => setDbRange(data));
         getSourceFiles().then(data => setSourceFiles(data.files || []));
     };
