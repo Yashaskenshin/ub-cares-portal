@@ -38,9 +38,7 @@ const Login: React.FC = () => {
         setIsLoading(true);
         setError('');
 
-        // Simulate slight network delay for better UX
-        setTimeout(() => {
-            const success = login(password);
+        login(password).then((success) => {
             if (success) {
                 navigate(from, { replace: true });
             } else {
@@ -48,7 +46,10 @@ const Login: React.FC = () => {
                 setPassword('');
             }
             setIsLoading(false);
-        }, 400);
+        }).catch(() => {
+            setError('System error during login.');
+            setIsLoading(false);
+        });
     };
 
     return (
