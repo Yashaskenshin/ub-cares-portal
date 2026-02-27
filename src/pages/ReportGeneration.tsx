@@ -374,7 +374,7 @@ const ReportGeneration: React.FC = () => {
                                             variant="contained"
                                             size="large"
                                             startIcon={<DownloadIcon />}
-                                            href={`${API_BASE_URL}/api/reports/${latestBrief.filename}`}
+                                            href={`${API_BASE_URL}/api/reports/${latestBrief.filename}?token=${sessionStorage.getItem('jwtToken')}`}
                                             sx={{
                                                 py: 1.5, px: 4,
                                                 fontSize: '1.1rem',
@@ -431,7 +431,7 @@ const ReportGeneration: React.FC = () => {
                                     {formatSize(report.size)}
                                 </TableCell>
                                 <TableCell align="right">
-                                    <ArrowButton href={`${API_BASE_URL}/api/reports/${report.filename}`}>
+                                    <ArrowButton href={`${API_BASE_URL}/api/reports/${report.filename}?token=${sessionStorage.getItem('jwtToken')}`}>
                                         <DownloadIcon fontSize="small" />
                                     </ArrowButton>
                                 </TableCell>
