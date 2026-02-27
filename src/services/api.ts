@@ -1,6 +1,12 @@
-// Use Vite environment variable or fallback to localhost
-export const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:3001';
+// Use Vite environment variable, fallback to localhost in dev, or Railway URL in production
+export const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV ? 'http://localhost:3001' : 'https://ubcares-production.up.railway.app');
 const API_URL = `${API_BASE_URL}/api`;
+
+// Helper to get auth headers
+const getAuthHeaders = (): Record<string, string> => {
+    const token = sessionStorage.getItem('jwtToken');
+    return token ? { 'Authorization': `Bearer ${token}` } : {};
+};
 
 export const uploadFile = async (file: File) => {
     const formData = new FormData();
@@ -8,6 +14,9 @@ export const uploadFile = async (file: File) => {
 
     const response = await fetch(`${API_URL}/upload`, {
         method: 'POST',
+        headers: {
+            ...getAuthHeaders()
+        },
         body: formData,
     });
     return response.json();
@@ -21,14 +30,19 @@ export const getMetrics = async () => {
 export const saveManualInputs = async (inputs: any) => {
     const response = await fetch(`${API_URL}/manual-inputs`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders()
+        },
         body: JSON.stringify(inputs)
     });
     return response.json();
 };
 
 export const getManualInputs = async () => {
-    const response = await fetch(`${API_URL}/manual-inputs`);
+    const response = await fetch(`${API_URL}/manual-inputs`, {
+        headers: { ...getAuthHeaders() }
+    });
     return response.json();
 };
 
@@ -44,7 +58,10 @@ export const generateReport = async (
 ) => {
     const response = await fetch(`${API_URL}/generate-report`, {
         method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
+        headers: {
+            'Content-Type': 'application/json',
+            ...getAuthHeaders()
+        },
         body: JSON.stringify({
             useAI,
             useLeadershipBrief,
@@ -60,7 +77,9 @@ export const generateReport = async (
 };
 
 export const getSourceFiles = async () => {
-    const response = await fetch(`${API_URL}/source-files`);
+    const response = await fetch(`${API_URL}/source-files`, {
+        headers: { ...getAuthHeaders() }
+    });
     return response.json();
 };
 
@@ -70,6 +89,8 @@ export const getDbDateRange = async () => {
 };
 
 export const getReports = async () => {
-    const response = await fetch(`${API_URL}/reports?t=${new Date().getTime()}`);
+    const response = await fetch(`${API_URL}/reports?t=${new Date().getTime()}`, {
+        headers: { ...getAuthHeaders() }
+    });
     return response.json();
 }
