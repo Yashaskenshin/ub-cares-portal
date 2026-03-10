@@ -26,7 +26,9 @@ import {
     MenuItem,
     InputLabel,
     FormControl,
-    SelectChangeEvent
+    SelectChangeEvent,
+    Alert,
+    CircularProgress
 } from '@mui/material';
 import {
     Download as DownloadIcon,
@@ -36,7 +38,6 @@ import {
     History as HistoryIcon,
     Star as StarIcon,
     AccessTime as TimeIcon,
-    AutoGraph as AIIcon,
     WorkspacePremium as LeadershipIcon,
     TrendingUp as ROIIcon,
     CompareArrows,
@@ -48,7 +49,6 @@ import { getReports, generateReport, getDbDateRange, getSourceFiles, API_BASE_UR
 const ReportGeneration: React.FC = () => {
     const [reports, setReports] = useState<any[]>([]);
     const [generating, setGenerating] = useState(false);
-    const [useAI, setUseAI] = useState(false);
     const [useLeadershipBrief, setUseLeadershipBrief] = useState(true);
     const [useROIReport, setUseROIReport] = useState(false);
     const [useComparisonReport, setUseComparisonReport] = useState(false);
@@ -57,6 +57,11 @@ const ReportGeneration: React.FC = () => {
     const [appendRoiToLeadership, setAppendRoiToLeadership] = useState(false);
 
     const [lastSourceFile, setLastSourceFile] = useState<string | null>(null);
+    const [generateError, setGenerateError] = useState<string | null>(null);
+
+    // Page load state
+    const [pageLoading, setPageLoading] = useState(true);
+    const [pageError, setPageError] = useState<string | null>(null);
 
     // Source Files
     const [sourceFiles, setSourceFiles] = useState<any[]>([]);
@@ -72,9 +77,29 @@ const ReportGeneration: React.FC = () => {
     const [toDate, setToDate] = useState<string>(today);
 
     const fetchReports = () => {
-        getReports().then(data => setReports(data.reports || []));
-        getDbDateRange().then(data => setDbRange(data));
-        getSourceFiles().then(data => setSourceFiles(data.files || []));
+        setPageError(null);
+        setPageLoading(true);
+
+        Promise.all([
+            getReports().catch(err => {
+                console.error('Failed to fetch reports:', err);
+                setPageError('Could not load reports. Is the API running?');
+                return { reports: [] };
+            }),
+            getDbDateRange().catch(err => {
+                console.error('Failed to fetch date range:', err);
+                return null;
+            }),
+            getSourceFiles().catch(err => {
+                console.error('Failed to fetch source files:', err);
+                return { files: [] };
+            })
+        ]).then(([reportsData, rangeData, filesData]) => {
+            setReports(reportsData?.reports || []);
+            setDbRange(rangeData);
+            setSourceFiles(filesData?.files || []);
+            setPageLoading(false);
+        });
     };
 
     useEffect(() => {
@@ -84,22 +109,30 @@ const ReportGeneration: React.FC = () => {
     const handleGenerate = async () => {
         setGenerating(true);
         setLastSourceFile(null);
+        setGenerateError(null);
 
-        const result = await generateReport(
-            useAI,
-            useLeadershipBrief,
-            useROIReport,
-            useComparisonReport,
-            useFullDateRange ? undefined : fromDate,
-            useFullDateRange ? undefined : toDate,
-            selectedFile || undefined,
-            appendRoiToLeadership
-        );
-        setGenerating(false);
-        if (result && result.report && result.report.sourceFile) {
-            setLastSourceFile(result.report.sourceFile);
+        try {
+            const result = await generateReport(
+                false,
+                useLeadershipBrief,
+                useROIReport,
+                useComparisonReport,
+                useFullDateRange ? undefined : fromDate,
+                useFullDateRange ? undefined : toDate,
+                selectedFile || undefined,
+                appendRoiToLeadership
+            );
+            if (result && result.success === false) {
+                setGenerateError(result.error || 'Report generation failed. Check the server logs.');
+            } else if (result && result.report && result.report.sourceFile) {
+                setLastSourceFile(result.report.sourceFile);
+            }
+        } catch (err: any) {
+            setGenerateError(err.message || 'Unknown error occurred.');
+        } finally {
+            setGenerating(false);
+            fetchReports();
         }
-        fetchReports();
     };
 
     const formatSize = (bytes: number) => {
@@ -125,6 +158,29 @@ const ReportGeneration: React.FC = () => {
         if (filename.includes('leadership_brief')) return <Chip label="Leadership" style={{ borderColor: '#eab308', color: '#eab308' }} size="small" variant="outlined" />;
         if (filename.includes('strategic_comparison')) return <Chip label="Strategic" style={{ borderColor: '#10b981', color: '#10b981' }} size="small" variant="outlined" />;
         return <Chip label="Report" size="small" variant="outlined" />;
+    };
+
+    const handleDownload = async (filename: string) => {
+        try {
+            const token = sessionStorage.getItem('jwtToken');
+            const response = await fetch(`${API_BASE_URL}/api/reports/${filename}`, {
+                headers: { 'Authorization': `Bearer ${token}` }
+            });
+            if (!response.ok) throw new Error('Download failed');
+
+            const blob = await response.blob();
+            const url = window.URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            window.URL.revokeObjectURL(url);
+            document.body.removeChild(a);
+        } catch (err) {
+            console.error('Error downloading file:', err);
+            setGenerateError('Failed to download report. Please try again.');
+        }
     };
 
     // Split reports into Latest (Hero) and History
@@ -206,22 +262,6 @@ const ReportGeneration: React.FC = () => {
                             variant="outlined"
                             slotProps={{ inputLabel: { shrink: true } }}
                             sx={{ width: 150 }}
-                        />
-                        <FormControlLabel
-                            control={
-                                <Checkbox
-                                    checked={useAI}
-                                    onChange={(e) => setUseAI(e.target.checked)}
-                                    color="primary"
-                                    size="small"
-                                    sx={{ color: 'rgba(99, 102, 241, 0.5)' }}
-                                />
-                            }
-                            label={
-                                <Typography variant="body2" sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                                    <AIIcon fontSize="inherit" color="action" /> Enable AI Deep Analysis
-                                </Typography>
-                            }
                         />
                         <FormControlLabel
                             control={
@@ -325,6 +365,31 @@ const ReportGeneration: React.FC = () => {
                 </Box>
             </Box>
 
+            {/* Error State */}
+            {pageError && (
+                <Alert severity="error" sx={{ mb: 4 }}>
+                    {pageError}
+                </Alert>
+            )}
+
+            {/* Loading State */}
+            {pageLoading && !pageError && (
+                <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+                    <CircularProgress />
+                </Box>
+            )}
+
+            {/* Error Banner */}
+            {generateError && (
+                <Box sx={{ mb: 4, p: 2, bgcolor: 'rgba(239,68,68,0.1)', border: '1px solid rgba(239,68,68,0.3)', borderRadius: 2, display: 'flex', alignItems: 'flex-start', gap: 1 }}>
+                    <Typography variant="body2" sx={{ color: '#ef4444', fontWeight: 700, minWidth: 28 }}>⚠️</Typography>
+                    <Box>
+                        <Typography variant="body2" sx={{ color: '#ef4444', fontWeight: 700 }}>Report Generation Failed</Typography>
+                        <Typography variant="body2" sx={{ color: 'text.secondary', mt: 0.5, fontFamily: 'monospace', fontSize: '0.75rem' }}>{generateError}</Typography>
+                    </Box>
+                </Box>
+            )}
+
             {/* Success Message with Source File */}
             {lastSourceFile && (
                 <Box sx={{ mb: 4, p: 2, bgcolor: 'rgba(74, 222, 128, 0.1)', border: '1px solid rgba(74, 222, 128, 0.2)', borderRadius: 2, display: 'flex', alignItems: 'center' }}>
@@ -374,7 +439,7 @@ const ReportGeneration: React.FC = () => {
                                             variant="contained"
                                             size="large"
                                             startIcon={<DownloadIcon />}
-                                            href={`${API_BASE_URL}/api/reports/${latestBrief.filename}?token=${sessionStorage.getItem('jwtToken')}`}
+                                            onClick={() => handleDownload(latestBrief.filename)}
                                             sx={{
                                                 py: 1.5, px: 4,
                                                 fontSize: '1.1rem',
@@ -431,7 +496,7 @@ const ReportGeneration: React.FC = () => {
                                     {formatSize(report.size)}
                                 </TableCell>
                                 <TableCell align="right">
-                                    <ArrowButton href={`${API_BASE_URL}/api/reports/${report.filename}?token=${sessionStorage.getItem('jwtToken')}`}>
+                                    <ArrowButton onClick={() => handleDownload(report.filename)}>
                                         <DownloadIcon fontSize="small" />
                                     </ArrowButton>
                                 </TableCell>

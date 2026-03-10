@@ -56,24 +56,32 @@ export const generateReport = async (
     filename?: string,
     appendRoiToLeadership: boolean = false
 ) => {
-    const response = await fetch(`${API_URL}/generate-report`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-            ...getAuthHeaders()
-        },
-        body: JSON.stringify({
-            useAI,
-            useLeadershipBrief,
-            useROIReport,
-            useComparisonReport,
-            fromDate,
-            toDate,
-            filename,
-            appendRoiToLeadership
-        })
-    });
-    return response.json();
+    try {
+        const response = await fetch(`${API_URL}/generate-report`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+                ...getAuthHeaders()
+            },
+            body: JSON.stringify({
+                useAI,
+                useLeadershipBrief,
+                useROIReport,
+                useComparisonReport,
+                fromDate,
+                toDate,
+                filename,
+                appendRoiToLeadership
+            })
+        });
+        if (!response.ok) {
+            const errText = await response.text();
+            return { success: false, error: `Server error (${response.status}): ${errText.slice(0, 200)}` };
+        }
+        return response.json();
+    } catch (err: any) {
+        return { success: false, error: err.message || 'Network error connecting to the server.' };
+    }
 };
 
 export const getSourceFiles = async () => {
@@ -93,4 +101,25 @@ export const getReports = async () => {
         headers: { ...getAuthHeaders() }
     });
     return response.json();
-}
+};
+
+export const getHealth = async () => {
+    try {
+        const response = await fetch(`${API_URL}/health`);
+        return await response.json();
+    } catch (e) {
+        return { status: 'error' };
+    }
+};
+
+export const getSyncStatus = async () => {
+    try {
+        const response = await fetch(`${API_URL}/sync/status`, {
+            headers: { ...getAuthHeaders() }
+        });
+        if (!response.ok) return null;
+        return await response.json();
+    } catch (e) {
+        return null;
+    }
+};

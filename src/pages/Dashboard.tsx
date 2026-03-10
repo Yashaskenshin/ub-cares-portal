@@ -19,7 +19,7 @@ import {
     HealthAndSafety as HealthIcon
 } from '@mui/icons-material';
 
-import { getMetrics } from '../services/api';
+import { getMetrics, getHealth, getSyncStatus } from '../services/api';
 
 const ExpandableBreweryRow = ({ row }: { row: any }) => {
     const [expanded, setExpanded] = useState(false);
@@ -77,20 +77,43 @@ const Dashboard: React.FC = () => {
     const [metrics, setMetrics] = useState<any>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
+    const [health, setHealth] = useState<any>(null);
+    const [syncStatus, setSyncStatus] = useState<any>(null);
 
     useEffect(() => {
-        getMetrics().then(data => {
-            if (data.status === 'error' || data.error) {
-                setError(data.error || 'Failed to fetch metrics');
-            } else {
-                setMetrics(data);
+        const fetchMetrics = () => {
+            getMetrics().then(data => {
+                if (data.status === 'error' || data.error) {
+                    setError(data.error || 'Failed to fetch metrics');
+                } else {
+                    setMetrics(data);
+                }
+                setLoading(false);
+            }).catch(err => {
+                console.error(err);
+                setError('Could not connect to backend API.');
+                setLoading(false);
+            });
+        };
+
+        const fetchStatus = async () => {
+            try {
+                const h = await getHealth();
+                setHealth(h);
+                const s = await getSyncStatus();
+                setSyncStatus(s);
+            } catch (e) {
+                console.error("Failed to fetch status");
             }
-            setLoading(false);
-        }).catch(err => {
-            console.error(err);
-            setError('Could not connect to backend API.');
-            setLoading(false);
-        });
+        };
+
+        fetchMetrics();
+        fetchStatus();
+        const interval = setInterval(() => {
+            fetchMetrics();
+            fetchStatus();
+        }, 60000);
+        return () => clearInterval(interval);
     }, []);
 
     if (loading) return (
@@ -242,11 +265,40 @@ const Dashboard: React.FC = () => {
                                     </Typography>
                                 </Box>
 
+                                {syncStatus && (
+                                    <Box sx={{ mb: 3 }}>
+                                        <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+                                            SQLite DB Records:
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ fontWeight: 600, mb: 0.5 }}>
+                                            {syncStatus.total_records?.toLocaleString()}
+                                        </Typography>
+                                        {syncStatus.last_sync ? (
+                                            <Box sx={{ p: 1.5, bgcolor: 'rgba(16, 185, 129, 0.08)', borderRadius: 1, border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                                                <Typography variant="caption" sx={{ color: '#10b981', display: 'block', fontWeight: 600, mb: 0.5 }}>
+                                                    Last Sync: {new Date(syncStatus.last_sync).toLocaleString()}
+                                                </Typography>
+                                                {syncStatus.last_operation && (
+                                                    <Typography variant="caption" color="text.secondary">
+                                                        Fetched: {syncStatus.last_operation.records_fetched} &nbsp;·&nbsp; Inserted: {syncStatus.last_operation.records_inserted} &nbsp;·&nbsp; Updated: {syncStatus.last_operation.records_updated}
+                                                    </Typography>
+                                                )}
+                                            </Box>
+                                        ) : (
+                                            <Box sx={{ p: 1.5, bgcolor: 'rgba(239, 68, 68, 0.08)', borderRadius: 1, border: '1px solid rgba(239, 68, 68, 0.2)' }}>
+                                                <Typography variant="caption" sx={{ color: '#ef4444' }}>
+                                                    No sync recorded yet
+                                                </Typography>
+                                            </Box>
+                                        )}
+                                    </Box>
+                                )}
+
                                 <Divider sx={{ my: 'auto', opacity: 0 }} />
-                                <Box sx={{ p: 2, bgcolor: 'rgba(16, 185, 129, 0.1)', borderRadius: 2, border: '1px solid rgba(16, 185, 129, 0.2)' }}>
+                                <Box sx={{ p: 2, bgcolor: health?.status === 'ok' ? 'rgba(16, 185, 129, 0.1)' : 'rgba(239, 68, 68, 0.1)', borderRadius: 2, border: `1px solid ${health?.status === 'ok' ? 'rgba(16, 185, 129, 0.2)' : 'rgba(239, 68, 68, 0.2)'}` }}>
                                     <Typography variant="body2" sx={{ display: 'flex', alignItems: 'center' }}>
-                                        <Box component="span" sx={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', bgcolor: '#10b981', mr: 1, animation: 'pulse 2s infinite' }} />
-                                        Backend System Online
+                                        <Box component="span" sx={{ display: 'inline-block', width: 8, height: 8, borderRadius: '50%', bgcolor: health?.status === 'ok' ? '#10b981' : '#ef4444', mr: 1, animation: health?.status === 'ok' ? 'pulse 2s infinite' : 'none' }} />
+                                        {health?.status === 'ok' ? `Backend System Online (Uptime: ${Math.floor((health?.uptime || 0) / 3600)}h)` : 'Backend System Offline'}
                                     </Typography>
                                 </Box>
                             </Paper>
