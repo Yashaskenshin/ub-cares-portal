@@ -3,7 +3,7 @@ export const API_BASE_URL = import.meta.env.VITE_API_URL || (import.meta.env.DEV
 const API_URL = `${API_BASE_URL}/api`;
 
 // Helper to get auth headers
-const getAuthHeaders = (): Record<string, string> => {
+export const getAuthHeaders = (): Record<string, string> => {
     const token = sessionStorage.getItem('jwtToken');
     return token ? { 'Authorization': `Bearer ${token}` } : {};
 };

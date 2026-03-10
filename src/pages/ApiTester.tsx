@@ -29,7 +29,7 @@ import {
     Code as CodeIcon
 } from '@mui/icons-material';
 
-import { API_BASE_URL } from '../services/api';
+import { API_BASE_URL, getAuthHeaders } from '../services/api';
 const API_URL = `${API_BASE_URL}/api`;
 
 const ApiTester: React.FC = () => {
@@ -55,7 +55,9 @@ const ApiTester: React.FC = () => {
     const checkHealth = async () => {
         setHealthLoading(true);
         try {
-            const res = await fetch(`${API_URL}/health/upstream`);
+            const res = await fetch(`${API_URL}/health/upstream`, {
+                headers: { ...getAuthHeaders() }
+            });
             const data = await res.json();
             setHealth(data);
         } catch (err) {
@@ -67,7 +69,9 @@ const ApiTester: React.FC = () => {
 
     const fetchSyncStatus = async () => {
         try {
-            const res = await fetch(`${API_URL}/sync/status`);
+            const res = await fetch(`${API_URL}/sync/status`, {
+                headers: { ...getAuthHeaders() }
+            });
             const data = await res.json();
             setSyncStatus(data);
         } catch (err) {
@@ -83,7 +87,7 @@ const ApiTester: React.FC = () => {
         try {
             const res = await fetch(`${API_URL}/sync`, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: { 'Content-Type': 'application/json', ...getAuthHeaders() },
                 body: JSON.stringify({ mode })
             });
             const data = await res.json();
@@ -101,7 +105,9 @@ const ApiTester: React.FC = () => {
     const fetchRecords = async () => {
         setRecordsLoading(true);
         try {
-            const res = await fetch(`${API_URL}/db/records?limit=10`);
+            const res = await fetch(`${API_URL}/db/records?limit=10`, {
+                headers: { ...getAuthHeaders() }
+            });
             const data = await res.json();
             if (Array.isArray(data)) {
                 setRecords(data);
