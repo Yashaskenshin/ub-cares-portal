@@ -55,6 +55,8 @@ const ReportGeneration: React.FC = () => {
     const [showAllArchive, setShowAllArchive] = useState(false);
     const [useFullDateRange, setUseFullDateRange] = useState(false);
     const [appendRoiToLeadership, setAppendRoiToLeadership] = useState(false);
+    const [useBatchAlert, setUseBatchAlert] = useState(false);
+    const [batchThreshold, setBatchThreshold] = useState<number>(3);
 
     const [lastSourceFile, setLastSourceFile] = useState<string | null>(null);
     const [generateError, setGenerateError] = useState<string | null>(null);
@@ -120,7 +122,9 @@ const ReportGeneration: React.FC = () => {
                 useFullDateRange ? undefined : fromDate,
                 useFullDateRange ? undefined : toDate,
                 selectedFile || undefined,
-                appendRoiToLeadership
+                appendRoiToLeadership,
+                useBatchAlert,
+                batchThreshold
             );
             if (result && result.success === false) {
                 setGenerateError(result.error || 'Report generation failed. Check the server logs.');
@@ -295,6 +299,36 @@ const ReportGeneration: React.FC = () => {
                                 </Typography>
                             }
                         />
+
+                        {/* Batch Alert Feature */}
+                        <FormControlLabel
+                            control={
+                                <Checkbox
+                                    checked={useBatchAlert}
+                                    onChange={(e) => setUseBatchAlert(e.target.checked)}
+                                    color="primary"
+                                    size="small"
+                                    sx={{ color: 'rgba(139, 92, 246, 0.8)' }}
+                                />
+                            }
+                            label={
+                                <Typography variant="body2" sx={{ color: 'text.secondary', display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                                    <StarIcon fontSize="inherit" sx={{ color: '#8b5cf6' }} /> Batch Spike Alert
+                                </Typography>
+                            }
+                        />
+                        {useBatchAlert && (
+                            <TextField
+                                label="Threshold"
+                                type="number"
+                                value={batchThreshold}
+                                onChange={(e) => setBatchThreshold(Number(e.target.value))}
+                                size="small"
+                                variant="outlined"
+                                slotProps={{ htmlInput: { min: 1 } }}
+                                sx={{ width: 100 }}
+                            />
+                        )}
 
                         {/* Append ROI to Leadership -> Depend on Leadership Brief */}
                         {useLeadershipBrief && (

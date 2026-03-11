@@ -54,7 +54,9 @@ export const generateReport = async (
     fromDate?: string,
     toDate?: string,
     filename?: string,
-    appendRoiToLeadership: boolean = false
+    appendRoiToLeadership: boolean = false,
+    useBatchAlert: boolean = false,
+    batchThreshold: number = 3
 ) => {
     try {
         const response = await fetch(`${API_URL}/generate-report`, {
@@ -71,7 +73,9 @@ export const generateReport = async (
                 fromDate,
                 toDate,
                 filename,
-                appendRoiToLeadership
+                appendRoiToLeadership,
+                useBatchAlert,
+                batchThreshold
             })
         });
         if (!response.ok) {
